@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="Chinese"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>quickSort | Jian Cui</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">quickSort</h1><a id="logo" href="/.">Jian Cui</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">quickSort</h1><div class="post-meta">Mar 16, 2017<script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>偶然看到阮一峰老师博客中几年前的一个<a href="http://www.ruanyifeng.com/blog/2011/04/quicksort_in_javascript.html" target="_blank" rel="external">快速排序算法</a>，每次循环一次都要创建两个额外数组，如果数据量大的话要占用不少额外内存。但是数组是引用类型，是可修改的，可以直接操作原数组本身来节约内存。</p>
+<p>下面自己写了一个，当做练手。（除去标准的双向分类外，还稍稍优化了代码，也加了单项优化方法，使其更加简洁）</p>
+<p>快速排序方法的关键在于选取一个值，将整个数组分为两部分，小的在左，大的在右，下面就是这个函数的写法：</p>
+<pre><code>//该函数的主要目的是交换数组中两个元素的位置
+function swap(arr, index1, index2) {
+
+  let data = arr[index1];
+  arr[index1] = arr[index2];
+  arr[index2] = arr[index1];
+
+  //数组是引用类型，允许修改原数组。
+}
+
+//选取随机值，将数组分为两部分
+function partition(arr, start, end) {
+  let keyIndex = end,
+    key = arr[keyIndex]; //将随机值(以后称key值)定为最后一个数，也可以真的随机选取，见下一行
+  // let keyIndex = Math.floor(Math.random() * (end - start)) + start;
+
+  let i = start,
+    j = end,
+    order = true;
+  //当order为true时正向筛选，当order为false时逆向筛选
+  //先从正向开始，因为我们把key值保存到了数组的结尾处。
+  while(i != j) {
+    if(order) {
+      //正向筛选
+      if (arr[i]&gt;key) {
+        swap(arr, i, j); //将大于key的数字和key进行交换
+        order = false;
+      } else {
+        i++;
+      }
+
+    } else {
+      //逆向筛选
+      if(arr[j]&lt;key) {
+        swap(arr, i, j); //将小于key的数字和key进行交换
+        order = true;
+      } else {
+        j--;
+      }
+    }
+  }
+  return i;//返回key值最终的位置
+}
+</code></pre><p>观察分组算法partition不难发现，其实i和j位置上始终有一个存着key值，然后和比它大或者比它小的值进行交换。那么我们也可以将其写成一个单向的分组方法：</p>
+<pre><code>function partition2(arr, start, end) {
+  let keyIndex = end,
+    key = arr[end];
+  let i = start -1,
+    j = start;
+  for (;j&lt;end;j++) {
+    if (arr[j]&lt; key) {
+    // i位置的值永远比key值小
+      i++;
+      if (i != j) {
+        swap(arr, i, j);
+      }
+    }
+  } 
+  ++i;
+  swap(arr, i, end);
+
+  return i; //返回key值最终的位置
+}
+</code></pre><p>接下来递归调用分组函数，将整个数组排序：</p>
+<pre><code>function quickSort(arr, start, end) {
+  if (start == end) return;
+  let index = partition(arr, start, end);
+  if (index &gt; start){
+    quickSort(arr, start, index-1);
+  }
+  if (index&lt;end) {
+    quickSort(arr, index+1, end);
+  }
+}
+</code></pre><p>代码请见： <a href="https://github.com/jian-cui/algorithm/blob/master/quickSort.js" target="_blank" rel="external">https://github.com/jian-cui/algorithm/blob/master/quickSort.js</a></p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://yoursite.com/2017/03/16/quickSort/" data-id="cj0bsynjl0002kcowrlcyx7ba" class="article-share-link">Aktie</a><div class="tags"></div><div class="post-nav"><a href="/2017/03/16/Fibonacci/" class="pre">Fibonacci</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://yoursite.com"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/js-delete/">js-delete</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/Fibonacci/">Fibonacci</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/quickSort/">quickSort</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">Jian Cui.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
